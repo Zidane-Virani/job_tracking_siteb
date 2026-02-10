@@ -27,7 +27,7 @@ export default function Home() {
           <div className="flex items-start gap-4">
             <div className="rounded-lg bg-pink-50 p-3">
               <BriefcaseIcon className="h-6 w-6 text-pink-500" />
-            </div>mong
+            </div>
             <div>
               <h3 className="text-xl font-bold text-black">Organize Applications</h3>
               <p className="mt-2 text-muted-foreground">
