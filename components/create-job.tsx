@@ -6,10 +6,22 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import { createJobApplication } from "@/lib/actions/job-applications";
 
 interface CreateJobApplicationProps {
     columnId: string;
     boardId: string;
+}
+
+const initialFormData = {
+    company: "",
+    position: "",
+    location: "",
+    notes: "",
+    salary: "",
+    jobUrl: "",
+    tags: "",
+    description: "",
 }
 
 
@@ -29,17 +41,27 @@ export default function CreateJobApplication({columnId, boardId}: CreateJobAppli
         description: "",
     });
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        try{
-            
-            
+        try {
+            const result = await createJobApplication({
+                ...formData,
+                columnId,
+                boardId,
+                tags: formData.tags.split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0)
+            });
 
-        }catch(error){
-            console.error(error)
-    }
-
+            if (!result.error) {
+                setFormData(initialFormData);
+                setOpen(false);
+            } else {
+                console.error("Failed to create a job application", result.error);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     return (
         <Dialog open = {open} onOpenChange={setOpen}>
