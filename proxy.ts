@@ -13,7 +13,7 @@ export default async function proxy(req: NextRequest){
     const isSignIn = req.nextUrl.pathname.startsWith("/sign-in");
     const isSignUp = req.nextUrl.pathname.startsWith("/sign-up");
 
-    if (isSignIn || isSignUp && session?.user){
+    if ((isSignIn || isSignUp) && session?.user){
         return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
