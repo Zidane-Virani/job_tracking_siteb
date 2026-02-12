@@ -26,20 +26,21 @@ export default function SignIn() {
         setError("");
         setLoading(true);
 
-        try{
+        try {
             const result = await signIn.email({
                 email,
                 password,
-            })
-            if(result.error){
+                callbackURL: "/dashboard",
+            });
+            if (result.error) {
                 setError(result.error.message || "Failed to sign in");
-            }else{
+            } else {
+                router.refresh();
                 router.push("/dashboard");
             }
-
-        }catch(error){
+        } catch {
             setError("Failed to sign in");
-        }finally{
+        } finally {
             setLoading(false);
         }
 

@@ -1,12 +1,27 @@
 import { betterAuth } from "better-auth";
-import { MongoClient } from "mongodb";
+import { MongoClient, Db } from "mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import initializeBoard from "../intial-board";
 
-const client = new MongoClient(process.env.MONGODB_URI!);
-const db = client.db();
+declare global {
+  var _mongoClientPromise: Promise<MongoClient> | undefined;
+}
+
+let clientPromise: Promise<MongoClient>;
+
+if (process.env.NODE_ENV === "production") {
+  clientPromise = new MongoClient(process.env.MONGODB_URI!).connect();
+} else {
+  if (!global._mongoClientPromise) {
+    global._mongoClientPromise = new MongoClient(process.env.MONGODB_URI!).connect();
+  }
+  clientPromise = global._mongoClientPromise;
+}
+
+const client = await clientPromise;
+const db: Db = client.db();
 
 export const auth = betterAuth({
   database: mongodbAdapter(db, {
