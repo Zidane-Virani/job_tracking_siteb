@@ -4,70 +4,65 @@ import { Edit2, ExternalLink, MoreVertical } from "lucide-react";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
 
-
-
-
 interface JobApplicationCards {
     job: JobApplication;
     columns: Column[];
 }
 
 export default function JobApplicationCard( {job, columns} : JobApplicationCards ){
+    const moveTargets = columns.filter((c) => c._id !== job.columnId);
 
     return (
-        <>
-            <Card>
-                <CardContent>
-                    <div>
-                        <div>
-                            <h3>{job.position}</h3>
-                            <p>{job.company}</p>
-                            {job.description && <p> {job.description}</p>}
+            <Card className="overflow-hidden rounded-xl border-slate-200/80 bg-white py-0 shadow-[0_6px_20px_rgba(15,23,42,0.05)] transition-all duration-200 hover:border-slate-300 hover:shadow-[0_12px_28px_rgba(15,23,42,0.1)]">
+                <CardContent className="p-3">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                            <h3 className="truncate text-sm font-semibold text-slate-900">{job.position}</h3>
+                            <p className="truncate text-xs font-medium text-slate-600">{job.company}</p>
+                            {job.description && (
+                                <p className="mt-2 text-xs leading-5 text-slate-600">{job.description}</p>
+                            )}
                             {job.tags && job.tags.length > 0 && (
-                                <div>
+                                <div className="mt-3 flex flex-wrap gap-1.5">
                                     {job.tags.map((tag,key) => (
-                                        <span key={key}>
+                                        <span key={`${tag}-${key}`} className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
                                             {tag}
                                         </span>
                                     ))}
                                 </div>
                             )}
                             {job.jobUrl && (
-                                <a target="_blank" href={job.jobUrl}> 
-                                    <ExternalLink/>
+                                <a
+                                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 transition-colors hover:text-slate-800"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    href={job.jobUrl}
+                                >
+                                    <ExternalLink className="h-3.5 w-3.5"/>
+                                    View listing
                                 </a>
                             )}
                         </div>
-                        <div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant = "ghost" size = "icon">
-                                        <MoreVertical></MoreVertical>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>
-                                        <Edit2/>
-                                        Edit
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant = "ghost" size = "icon-xs" className="rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-800">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem className="gap-2">
+                                    <Edit2 className="h-3.5 w-3.5"/>
+                                    Edit
+                                </DropdownMenuItem>
+                                {moveTargets.length > 0 && moveTargets.map((column, key) => (
+                                    <DropdownMenuItem key={key}>
+                                        Move to {column.name}
                                     </DropdownMenuItem>
-                                    {columns.length > 1 && (
-                                        <>
-                                            {columns
-                                                .filter((c) => c._id !== job.columnId)
-                                                .map((column, key) => (
-                                                    <DropdownMenuItem key={key}>
-                                                        Move to {column.name}
-                                                    </DropdownMenuItem>
-                                                ))}
-                                        </>
-                                    )}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </CardContent>
-                
             </Card>
-        </>
     )
 }
