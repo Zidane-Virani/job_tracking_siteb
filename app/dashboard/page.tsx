@@ -15,6 +15,9 @@ export default async function Dashboard() {
         name: "Job Applications"
     }).populate({
         path: "columns",
+        populate: {
+            path: "jobApplications"
+        }
     })
 
     return (
