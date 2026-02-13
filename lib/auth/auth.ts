@@ -1,41 +1,22 @@
 import { betterAuth } from "better-auth";
-import { MongoClient, Db } from "mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import connectDB from "../db";
 import initializeBoard from "../intial-board";
-
-declare global {
-  var _mongoClientPromise: Promise<MongoClient> | undefined;
-}
-
-let _clientPromise: Promise<MongoClient> | null = null;
-
-function getClientPromise(): Promise<MongoClient> {
-  if (process.env.NODE_ENV === "production") {
-    if (!_clientPromise) {
-      _clientPromise = new MongoClient(process.env.MONGODB_URI!).connect();
-    }
-    return _clientPromise;
-  } else {
-    if (!global._mongoClientPromise) {
-      global._mongoClientPromise = new MongoClient(process.env.MONGODB_URI!).connect();
-    }
-    return global._mongoClientPromise;
-  }
-}
 
 let _auth: ReturnType<typeof betterAuth> | null = null;
 
 async function getAuth() {
   if (_auth) return _auth;
 
-  const client = await getClientPromise();
-  const db: Db = client.db();
+  const mongooseInstance = await connectDB();
+  const client = mongooseInstance.connection.getClient() as any;
+  const db = client.db();
 
   _auth = betterAuth({
     database: mongodbAdapter(db, {
-      client
+      client,
     }),
     session: {
       cookieCache: {
