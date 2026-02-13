@@ -9,46 +9,62 @@ declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-let clientPromise: Promise<MongoClient>;
+let _clientPromise: Promise<MongoClient> | null = null;
 
-if (process.env.NODE_ENV === "production") {
-  clientPromise = new MongoClient(process.env.MONGODB_URI!).connect();
-} else {
-  if (!global._mongoClientPromise) {
-    global._mongoClientPromise = new MongoClient(process.env.MONGODB_URI!).connect();
+function getClientPromise(): Promise<MongoClient> {
+  if (process.env.NODE_ENV === "production") {
+    if (!_clientPromise) {
+      _clientPromise = new MongoClient(process.env.MONGODB_URI!).connect();
+    }
+    return _clientPromise;
+  } else {
+    if (!global._mongoClientPromise) {
+      global._mongoClientPromise = new MongoClient(process.env.MONGODB_URI!).connect();
+    }
+    return global._mongoClientPromise;
   }
-  clientPromise = global._mongoClientPromise;
 }
 
-const client = await clientPromise;
-const db: Db = client.db();
+let _auth: ReturnType<typeof betterAuth> | null = null;
 
-export const auth = betterAuth({
-  database: mongodbAdapter(db, {
-    client
-  }),
-  session: {
-    cookieCache: {
+async function getAuth() {
+  if (_auth) return _auth;
+
+  const client = await getClientPromise();
+  const db: Db = client.db();
+
+  _auth = betterAuth({
+    database: mongodbAdapter(db, {
+      client
+    }),
+    session: {
+      cookieCache: {
+        enabled: true,
+        maxAge: 60 * 60
+      }
+    },
+    emailAndPassword: {
       enabled: true,
-      maxAge: 60 * 60
-    }
-  },
-  emailAndPassword: { 
-    enabled: true, 
-  },
-  databaseHooks: {
-    user: {
-      create: {
-        after: async (user) => {
-          if (!user.id) return;
-          await initializeBoard(user.id);
+    },
+    databaseHooks: {
+      user: {
+        create: {
+          after: async (user) => {
+            if (!user.id) return;
+            await initializeBoard(user.id);
+          }
         }
       }
     }
-  }
-});
+  });
+
+  return _auth;
+}
+
+export { getAuth };
 
 export async function getSession(){
+  const auth = await getAuth();
   const result = await auth.api.getSession({
     headers: await headers()
   });
@@ -57,6 +73,7 @@ export async function getSession(){
 }
 
 export async function signOut(){
+  const auth = await getAuth();
   const result = await auth.api.signOut({
     headers: await headers()
   });
