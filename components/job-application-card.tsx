@@ -12,20 +12,30 @@ import EditJobApplication from "./edit-job";
 interface JobApplicationCards {
     job: JobApplication;
     columns: Column[];
+    onMove?: (jobId: string, newColumnId: string) => Promise<void>;
 }
 
-export default function JobApplicationCard( {job, columns} : JobApplicationCards ){
+export default function JobApplicationCard( {job, columns, onMove} : JobApplicationCards ){
     const [editOpen, setEditOpen] = useState(false);
     const moveTargets = columns.filter((c) => c._id !== job.columnId);
 
     async function handleMove(newColumnId: string) {
-    try {
-        const result = await updateJobApplication(job._id, {
-        columnId: newColumnId,
-        });
-    } catch (err) {
-        console.error("Failed to move job application:", err);
-    }
+        try {
+            if (onMove) {
+                await onMove(job._id, newColumnId);
+                return;
+            }
+
+            const result = await updateJobApplication(job._id, {
+                columnId: newColumnId,
+            });
+
+            if (result?.error) {
+                console.error("Failed to move job application:", result.error);
+            }
+        } catch (err) {
+            console.error("Failed to move job application:", err);
+        }
     }
 
 
