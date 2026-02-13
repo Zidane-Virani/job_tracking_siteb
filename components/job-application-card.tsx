@@ -1,9 +1,13 @@
+"use client";
+
 import { JobApplication, Column } from "@/lib/models/models.types";
 import { Card, CardContent } from "./ui/card";
 import { Edit2, ExternalLink, MoreVertical } from "lucide-react";
 import { Button } from "./ui/button";
 import { updateJobApplication } from "@/lib/actions/job-applications";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
+import { useState } from "react";
+import EditJobApplication from "./edit-job";
 
 interface JobApplicationCards {
     job: JobApplication;
@@ -11,6 +15,7 @@ interface JobApplicationCards {
 }
 
 export default function JobApplicationCard( {job, columns} : JobApplicationCards ){
+    const [editOpen, setEditOpen] = useState(false);
     const moveTargets = columns.filter((c) => c._id !== job.columnId);
 
     async function handleMove(newColumnId: string) {
@@ -25,6 +30,7 @@ export default function JobApplicationCard( {job, columns} : JobApplicationCards
 
 
     return (
+        <>
             <Card className="overflow-hidden rounded-xl border-slate-200/80 bg-white py-0 shadow-[0_6px_20px_rgba(15,23,42,0.05)] transition-all duration-200 hover:border-slate-300 hover:shadow-[0_12px_28px_rgba(15,23,42,0.1)]">
                 <CardContent className="p-3">
                     <div className="flex items-start justify-between gap-3">
@@ -62,7 +68,7 @@ export default function JobApplicationCard( {job, columns} : JobApplicationCards
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem className="gap-2">
+                                <DropdownMenuItem className="gap-2" onClick={() => setEditOpen(true)}>
                                     <Edit2 className="h-3.5 w-3.5"/>
                                     Edit
                                 </DropdownMenuItem>
@@ -76,5 +82,7 @@ export default function JobApplicationCard( {job, columns} : JobApplicationCards
                     </div>
                 </CardContent>
             </Card>
+            <EditJobApplication job={job} open={editOpen} onOpenChange={setEditOpen} />
+        </>
     )
 }
