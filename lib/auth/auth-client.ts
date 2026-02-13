@@ -1,9 +1,10 @@
-import { createAuthClient } from "better-auth/react" // make sure to import from better-auth/react
+import { createAuthClient } from "better-auth/react";
 
-
-export const authClient =  createAuthClient({
-    baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
-
+export const authClient = createAuthClient({
+  // Use same-origin auth endpoint to avoid localhost port/env mismatches in dev.
+  fetchOptions: {
+    throw: false,
+  },
 });
 
-export const {signIn, signUp, useSession, signOut} = authClient;
+export const { signIn, signUp, useSession, signOut } = authClient;

@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { signUp } from "@/lib/auth/auth-client";
+import { getAuthErrorMessage } from "@/lib/auth/get-auth-error-message";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -32,15 +33,19 @@ export default function SignUp() {
                 name,
                 email,
                 password,
-            })
+                callbackURL: "/dashboard",
+            });
+
             if(result.error){
-                setError(result.error.message || "Failed to sign up");
+                setError(getAuthErrorMessage(result.error, "Failed to sign up"));
             }else{
+                router.refresh();
                 router.push("/dashboard");
             }
 
         }catch(error){
-            setError("Failed to sign up");
+            console.error("Failed to sign up:", error);
+            setError(getAuthErrorMessage(error, "Failed to sign up"));
         }finally{
             setLoading(false);
         }

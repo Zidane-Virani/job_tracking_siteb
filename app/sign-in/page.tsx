@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { signIn } from "@/lib/auth/auth-client";
+import { getAuthErrorMessage } from "@/lib/auth/get-auth-error-message";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -32,14 +33,16 @@ export default function SignIn() {
                 password,
                 callbackURL: "/dashboard",
             });
+
             if (result.error) {
-                setError(result.error.message || "Failed to sign in");
+                setError(getAuthErrorMessage(result.error, "Failed to sign in"));
             } else {
                 router.refresh();
                 router.push("/dashboard");
             }
-        } catch {
-            setError("Failed to sign in");
+        } catch (error) {
+            console.error("Failed to sign in:", error);
+            setError(getAuthErrorMessage(error, "Failed to sign in"));
         } finally {
             setLoading(false);
         }
@@ -56,6 +59,7 @@ export default function SignIn() {
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4">
+                        {error && <p className="text-red-500 text-sm">{error}</p>}
                         <div className="space-y-2">
                             <Label htmlFor="email" className="text-sm font-medium">Email</Label>
                             <Input value={email} onChange={(e) => setEmail(e.target.value)} id="email"type="email" placeholder="Enter your email" required className="h-10 rounded-md border-gray-300 focus:border-black focus:ring-black"/>
