@@ -22,9 +22,7 @@ async function getBoard(userId: string) {
     })
     if (!boardDoc) return null;
 
-    const board = boardDoc ? boardDoc.toObject() : null;
-
-    return board;
+    return JSON.parse(JSON.stringify(boardDoc.toObject()));
 
 }
 
@@ -42,7 +40,7 @@ async function DashBoardPage(){
                     )}
                 </div>
                 <div className="flex flex-1">
-                    <KanbanBoard board={JSON.parse(JSON.stringify(board))} />
+                    <KanbanBoard board={board} />
                 </div>
             </div>
         </div>
